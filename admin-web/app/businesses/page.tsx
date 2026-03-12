@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 import type { ReactNode } from 'react';
 
 function Shell({ children }: { children: ReactNode }) {
