@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabaseClient';
 import type { ReactNode } from 'react';
 
 function Shell({ children }: { children: ReactNode }) {
@@ -25,16 +26,60 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
-export default function AdminBusinessesPage() {
+export default async function AdminBusinessesPage() {
+  const { data, error } = await supabase
+    .from('businesses')
+    .select('id, name, city, created_at, owner_id')
+    .order('created_at', { ascending: false });
+
+  const businesses = data ?? [];
+
   return (
     <Shell>
       <div className="space-y-4">
         <h1 className="text-xl font-semibold">Все бизнесы</h1>
-        <p className="text-sm text-slate-400">
-          Здесь супер‑админ видит список всех бизнесов и может управлять ими.
-        </p>
+        {error && (
+          <p className="text-sm text-red-400">
+            Ошибка загрузки данных из Supabase.
+          </p>
+        )}
+        {businesses.length === 0 ? (
+          <p className="text-sm text-slate-400">
+            Пока нет ни одного бизнеса на платформе.
+          </p>
+        ) : (
+          <div className="border border-slate-800 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-900 text-slate-400">
+                <tr>
+                  <th className="text-left p-2">Название</th>
+                  <th className="text-left p-2">Город</th>
+                  <th className="text-left p-2">Владелец (id)</th>
+                  <th className="text-left p-2">Создан</th>
+                </tr>
+              </thead>
+              <tbody>
+                {businesses.map((b) => (
+                  <tr key={b.id} className="border-t border-slate-800">
+                    <td className="p-2">{b.name}</td>
+                    <td className="p-2">{b.city ?? '—'}</td>
+                    <td className="p-2 text-xs text-slate-500">
+                      {b.owner_id}
+                    </td>
+                    <td className="p-2 text-xs text-slate-500">
+                      {b.created_at
+                        ? new Date(b.created_at as string).toLocaleString()
+                        : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </Shell>
   );
 }
+
 

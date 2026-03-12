@@ -1,9 +1,9 @@
 import { Telegraf } from 'telegraf';
+import { supabase } from './services/supabaseClient';
 
 const token = process.env.BOT_TOKEN;
 
 if (!token) {
-  // В реальном запуске нужно передать BOT_TOKEN через переменные окружения
   throw new Error('BOT_TOKEN is not set');
 }
 
@@ -11,15 +11,25 @@ const bot = new Telegraf(token);
 
 // /start
 bot.start(async (ctx) => {
-  const businessHint = ctx.message && 'text' in ctx.message
-    ? ctx.message.text.split(' ')[1]
-    : undefined;
+  const businessHint =
+    ctx.message && 'text' in ctx.message
+      ? ctx.message.text.split(' ')[1]
+      : undefined;
 
   await ctx.reply(
     businessHint
       ? `Добро пожаловать! Вы зашли по ссылке бизнеса: ${businessHint}.`
       : 'Добро пожаловать в программу лояльности!'
   );
+
+  // Простой тест Supabase: считаем количество бизнесов
+  const { count } = await supabase
+    .from('businesses')
+    .select('*', { head: true, count: 'exact' });
+
+  if (typeof count === 'number') {
+    await ctx.reply(`Сейчас на платформе подключено бизнесов: ${count}.`);
+  }
 });
 
 // /points
