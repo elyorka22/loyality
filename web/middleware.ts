@@ -17,13 +17,13 @@ export async function middleware(req: NextRequest) {
       get(name: string) {
         return req.cookies.get(name)?.value;
       },
-      set(_name: string, _value: string, _options: CookieOptions) {
-        // Для простоты в этом прототипе не записываем cookie из middleware.
+      set(name: string, value: string, options: CookieOptions) {
+        res.cookies.set({ name, value, ...options });
       },
-      remove(_name: string, _options: CookieOptions) {
-        // Для простоты в этом прототипе не удаляем cookie из middleware.
-      }
-    }
+      remove(name: string, options: CookieOptions) {
+        res.cookies.set({ name, value: '', ...options, maxAge: 0 });
+      },
+    },
   });
 
   const {
